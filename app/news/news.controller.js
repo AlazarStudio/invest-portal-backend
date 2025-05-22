@@ -4,11 +4,11 @@ import { prisma } from '../prisma.js'
 
 // @desc    Get news
 // @route   GET /api/news
-// @access  Private
+// @access  Public
 export const getAllNews = asyncHandler(async (req, res) => {
 	const { range, sort, filter } = req.query
 
-	const sortField = sort ? JSON.parse(sort)[0] : 'createdAt'
+	const sortField = sort ? JSON.parse(sort)[0] : 'date'
 	const sortOrder = sort ? JSON.parse(sort)[1].toLowerCase() : 'desc' // Приводим к нижнему регистру для Prisma
 
 	const rangeStart = range ? JSON.parse(range)[0] : 0
@@ -30,7 +30,7 @@ export const getAllNews = asyncHandler(async (req, res) => {
 
 // @desc    Get news
 // @route   GET /api/news/:id
-// @access  Private
+// @access  Public
 export const getNews = asyncHandler(async (req, res) => {
 	const news = await prisma.news.findUnique({
 		where: { id: +req.params.id }

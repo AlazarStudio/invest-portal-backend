@@ -34,6 +34,16 @@ model News {
   images    String[]
 }
 
+model Project {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  title     String
+  type      String
+  text      String
+  images    String[] @default([])
+}
+
 model Group {
   id       Int        @id @default(autoincrement())
   title    String
