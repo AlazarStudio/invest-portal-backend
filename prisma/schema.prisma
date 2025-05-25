@@ -44,6 +44,17 @@ model Project {
   images    String[] @default([])
 }
 
+model SupportMeasures {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  header    String?
+  title     String
+  type      String
+  text      String
+  images    String[]
+}
+
 model Group {
   id       Int        @id @default(autoincrement())
   title    String
