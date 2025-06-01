@@ -2,6 +2,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import express from 'express'
 import fs from 'fs'
+import https from 'https'
 import morgan from 'morgan'
 import multer from 'multer'
 import path from 'path'
@@ -202,12 +203,27 @@ async function main() {
 	app.use(notFound)
 	app.use(errorHandler)
 
-	const PORT = process.env.PORT || 4000
+	// const PORT = process.env.PORT || 4000
 
-	app.listen(
-		PORT,
-		console.log(`Server running in ${process.env.NODE_ENV} on port ${PORT}`)
-	)
+	const PORT = process.env.PORT || 443
+
+	const sslOptions = {
+		key: fs.readFileSync(
+			'../../../etc/letsencrypt/live/backend.investkchr.ru/privkey.pem'
+		),
+		cert: fs.readFileSync(
+			'../../../etc/letsencrypt/live/backend.investkchr.ru/fullchain.pem'
+		)
+	}
+
+	https.createServer(sslOptions, app).listen(PORT, () => {
+		console.log(`HTTPS server running on port ${PORT}`)
+	})
+
+	// app.listen(
+	// 	PORT,
+	// 	console.log(`Server running in ${process.env.NODE_ENV} on port ${PORT}`)
+	// )
 }
 
 main()
