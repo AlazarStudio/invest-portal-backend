@@ -6,7 +6,17 @@ import { prisma } from '../prisma.js'
 // @route   GET /api/supportMeasures
 // @access  Public
 export const getSupportMeasures = asyncHandler(async (req, res) => {
-	const { range, sort, filter } = req.query
+	const { range, sort, filter, all } = req.query
+
+	  if (all === 'true') {
+    // отдаём _все_ записи, игнорируем range
+    const supportMeasures = await prisma.supportMeasures.findMany({
+      createdAt: {
+        date: 'desc'
+      }
+    });
+    return res.json(supportMeasures);
+  }
 
 	const sortField = sort ? JSON.parse(sort)[0] : 'createdAt'
 	const sortOrder = sort ? JSON.parse(sort)[1].toLowerCase() : 'desc' // Приводим к нижнему регистру для Prisma

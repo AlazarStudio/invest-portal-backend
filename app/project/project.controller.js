@@ -6,7 +6,17 @@ import { prisma } from '../prisma.js'
 // @route   GET /api/projects
 // @access  Public
 export const getProjects = asyncHandler(async (req, res) => {
-	const { range, sort, filter } = req.query
+	const { range, sort, filter, all } = req.query
+
+	  if (all === 'true') {
+    // отдаём _все_ записи, игнорируем range
+    const projects = await prisma.project.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+    return res.json(projects);
+  }
 
 	const sortField = sort ? JSON.parse(sort)[0] : 'createdAt'
 	const sortOrder = sort ? JSON.parse(sort)[1].toLowerCase() : 'desc' // Приводим к нижнему регистру для Prisma
@@ -24,7 +34,7 @@ export const getProjects = asyncHandler(async (req, res) => {
 		}
 	})
 
-	res.set('Content-Range', `news ${rangeStart}-${rangeEnd}/${totalProjects}`)
+	res.set('Content-Range', `projects ${rangeStart}-${rangeEnd}/${totalProjects}`)
 	res.json(projects)
 })
 

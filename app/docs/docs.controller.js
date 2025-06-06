@@ -6,13 +6,7 @@ import { prisma } from '../prisma.js'
 // @route   GET /api/docs
 // @access  Public
 export const getDocuments = asyncHandler(async (req, res) => {
-  const { range, sort, filter } = req.query;
-
-  // Парсинг сортировки и пейджинга (как у вас было)
-  const sortField = sort ? JSON.parse(sort)[0] : 'id';
-  const sortOrder = sort ? JSON.parse(sort)[1].toLowerCase() : 'desc';
-  const rangeStart = range ? JSON.parse(range)[0] : 0;
-  const rangeEnd   = range ? JSON.parse(range)[1] : 9;
+  const { range, sort, filter, all } = req.query;
 
   // Построение условия where
   const where = {};
@@ -28,7 +22,29 @@ export const getDocuments = asyncHandler(async (req, res) => {
     }
   }
 
-  // Считаем общее число документов с учётом фильтра
+  // Если ?all=true, возвращаем все документы без пагинации
+  if (all === 'true') {
+    const docs = await prisma.document.findMany({
+      where,
+      orderBy: {
+        id: 'desc' // или другой порядок
+      },
+      include: {
+        Group: {
+          select: { title: true }
+        }
+      }
+    });
+    return res.json(docs);
+  }
+
+  // Парсинг сортировки и пагинации
+  const sortField = sort ? JSON.parse(sort)[0] : 'id';
+  const sortOrder = sort ? JSON.parse(sort)[1].toLowerCase() : 'desc';
+  const rangeStart = range ? JSON.parse(range)[0] : 0;
+  const rangeEnd = range ? JSON.parse(range)[1] : 9;
+
+  // Считаем общее количество
   const totalDocuments = await prisma.document.count({ where });
 
   // Получаем документы
@@ -44,10 +60,11 @@ export const getDocuments = asyncHandler(async (req, res) => {
     }
   });
 
-  // Заголовок для Ranged API
+  // Заголовок Content-Range для React Admin
   res.set('Content-Range', `docs ${rangeStart}-${rangeEnd}/${totalDocuments}`);
   res.json(docs);
 });
+
 
 
 // @desc    Get document
